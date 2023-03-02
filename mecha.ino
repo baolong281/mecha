@@ -56,7 +56,7 @@ void setup() {
 }
 
 bool detectClap() {
-  bool result = lastSample < 800 && sampleBufferValue < 800 && lastSample - sampleBufferValue <= 0 && sampleBufferValue > 50;
+  bool result = lastSample < 800 && sampleBufferValue < 800 && lastSample - sampleBufferValue <= 0 && sampleBufferValue > 90;
   lastSample = sampleBufferValue;
   return result;
 }
@@ -86,19 +86,19 @@ void loop() {
       Serial.print("Clap seen. Clap detected: ");
       Serial.println(clapDetected);
       if(clapDetected) {
-        if(millisCurrent - lastClap < 600) {
           Serial.println("Light on");
           moveMotor();
           delay(1800);
                     motor.detach();
-        } else {
-          Serial.println("Light not on");
-        }
+          Serial.println(millisCurrent-lastClap);
           clapDetected = false;
       } else {
         lastClap = millisCurrent;
         clapDetected = true;
       }
+    } else if (millisCurrent - lastClap >= 600) {
+      lastClap = millisCurrent;
+      clapDetected=false;
     }
 
     updateMillis();
