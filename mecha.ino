@@ -9,6 +9,7 @@ const int SAMPLE_TIME = 30;
 unsigned long millisCurrent;
 unsigned long millisLast = 0;
 unsigned long millisElapsed = 0;
+Servo motor;
 //variables to get sample
 
 const int led = 8;
@@ -25,13 +26,14 @@ int motorState = 0;
 
 
 void moveMotor() {
+    motor.attach(6);
 	if(motorState ==0) {
     motorState = 1;
-    motor.write(90);
+    motor.write(0);
     return;
   } 
   motorState=0;
-  motor.write(-90);
+  motor.write(270);
 }
 
 
@@ -48,13 +50,13 @@ void onLed() {
 */
 
 void setup() {
-  pinMode(servoMotor, OUTPUT);
+  pinMode(6, OUTPUT);
   pinMode(led, OUTPUT);
   Serial.begin(9600);
 }
 
 bool detectClap() {
-  bool result = lastSample - sampleBufferValue < 0 && sampleBufferValue > 120 && sampleBufferValue < 3000;
+  bool result = lastSample < 800 && sampleBufferValue < 800 && lastSample - sampleBufferValue <= 0 && sampleBufferValue > 50;
   lastSample = sampleBufferValue;
   return result;
 }
@@ -81,12 +83,16 @@ void loop() {
 
   if(millisElapsed > SAMPLE_TIME){
     if(detectClap()) {
-      Serial.println("Clap seen");
+      Serial.print("Clap seen. Clap detected: ");
+      Serial.println(clapDetected);
       if(clapDetected) {
-        if(millisCurrent - lastClap < 400) {
+        if(millisCurrent - lastClap < 600) {
           Serial.println("Light on");
           moveMotor();
-          delay(500);
+          delay(1800);
+                    motor.detach();
+        } else {
+          Serial.println("Light not on");
         }
           clapDetected = false;
       } else {
